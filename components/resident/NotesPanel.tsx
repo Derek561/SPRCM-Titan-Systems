@@ -32,7 +32,7 @@ export default function NotesPanel({
 
     setLoading(false);
 
-    if (error) {
+    if (error || !data) {
       console.error(error);
       alert("Unable to add note.");
       return;
@@ -49,14 +49,17 @@ export default function NotesPanel({
         <h3 className="text-sm font-semibold text-slate-200 mb-2">
           Add a note
         </h3>
+
         <textarea
           className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 min-h-[80px]"
           placeholder="Document contact, case updates, or important details…"
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
+
         <div className="mt-2 flex justify-end">
           <button
+            type="button"
             onClick={handleAddNote}
             disabled={loading || !content.trim()}
             className="px-4 py-1.5 text-sm rounded-lg bg-orange-500 hover:bg-orange-400 text-white transition disabled:opacity-50"
@@ -78,23 +81,25 @@ export default function NotesPanel({
           </p>
         ) : (
           <ul className="space-y-2">
-        {notes.map((note) => (
-  <div
-    key={note.id}
-    className="rounded-lg bg-slate-800 border border-slate-700 p-4 space-y-3"
-  >
-    {/* Note content */}
-    <p className="text-slate-100 whitespace-pre-wrap">
-      {note.content}
-    </p>
+            {notes.map((note) => (
+              <li
+                key={note.id}
+                className="rounded-lg bg-slate-800 border border-slate-700 p-4 space-y-3"
+              >
+                <p className="text-slate-100 whitespace-pre-wrap">
+                  {note.content}
+                </p>
 
-    {/* Attachments */}
-    <AttachmentList noteId={note.id} />
+                <AttachmentList noteId={note.id} />
 
-    {/* Timestamp */}
-    <div className="text-xs text-slate-400">
-      {new Date(note.created_at).toLocaleString()}
+                <div className="text-xs text-slate-400">
+                  {new Date(note.created_at).toLocaleString()}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
-  </div>
-))}
-    
+  );
+}

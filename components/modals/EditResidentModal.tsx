@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import type { Resident } from "@/app/(app)/residents/page";
+import type { Resident } from "@/types/resident";
 
 export default function EditResidentModal({
   open,
@@ -15,21 +15,18 @@ export default function EditResidentModal({
   onClose: () => void;
   onUpdated: (resident: Resident) => void;
 }) {
-  const [fullName, setFullName] = useState("");
-  const [status, setStatus] = useState("active");
+  // Hooks must always run (unconditional)
+  const [fullName, setFullName] = useState(resident?.full_name ?? "");
+  const [status, setStatus] = useState(resident?.status ?? "active");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (resident) {
-      setFullName(resident.full_name);
-      setStatus(resident.status);
-    }
-  }, [resident]);
-
+  // Guard AFTER hooks
   if (!open || !resident) return null;
 
   async function handleSave() {
+    if (!resident) return;
     if (!fullName.trim()) return;
+
     setLoading(true);
 
     const { data, error } = await supabase
@@ -44,65 +41,58 @@ export default function EditResidentModal({
 
     setLoading(false);
 
-    if (!error && data) {
-      onUpdated(data as Resident);
-      onClose();
-    } else {
+    if (error || !data) {
       console.error(error);
       alert("Unable to update resident.");
+      return;
     }
+
+    onUpdated(data as Resident);
+    onClose();
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold text-slate-100 mb-4">
-          Edit Resident
-        </h2>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-slate-900 rounded-lg p-6 w-full max-w-md space-y-4 border border-slate-700">
+        <h2 className="text-slate-200 text-lg font-semibold">Edit Resident</h2>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
+        <label className="block text-sm text-slate-400">
+          Full Name
+          <input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="mt-1 w-full p-2 rounded bg-slate-800 border border-slate-700 text-slate-200"
+          />
+        </label>
 
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">
-              Status
-            </label>
-            <select
-              className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-        </div>
+        <label className="block text-sm text-slate-400">
+          Status
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="mt-1 w-full p-2 rounded bg-slate-800 border border-slate-700 text-slate-200"
+          >
+            <option value="active">Active</option>
+            <option value="discharged">Discharged</option>
+          </select>
+        </label>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-4">
           <button
+            type="button"
             onClick={onClose}
-            disabled={loading}
-            className="px-3 py-1.5 text-sm rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-700/40 transition"
+            className="px-4 py-2 text-slate-300 border border-slate-600 rounded hover:bg-slate-800"
           >
             Cancel
           </button>
+
           <button
+            type="button"
             onClick={handleSave}
             disabled={loading}
-            className="px-4 py-1.5 text-sm rounded-lg bg-orange-500 hover:bg-orange-400 text-white transition disabled:opacity-50"
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-500 disabled:opacity-60"
           >
-            {loading ? "Saving…" : "Save Changes"}
+            {loading ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
