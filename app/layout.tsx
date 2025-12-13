@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Topbar } from "@/components/layout/Topbar";
 
 export const metadata: Metadata = {
   title: "Titan Workflow Systems",
@@ -16,18 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-100">
-        <div className="flex min-h-screen">
-          {/* Left Sidebar */}
-          <Sidebar />
-
-          {/* Right Panel */}
-          <div className="flex flex-1 flex-col">
-            <Topbar />
-            <main className="flex-1 overflow-y-auto bg-slate-900 p-6">
-              {children}
-            </main>
-          </div>
-        </div>
+        {children}
       </body>
     </html>
   );

@@ -16,12 +16,30 @@ export function Sidebar() {
 
   return (
     <aside className="h-screen w-64 border-r border-slate-800 bg-slate-950/90 flex flex-col">
-      <div className="px-5 py-4 border-b border-slate-800 flex gap-2 items-center">
-        <div className="h-9 w-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-semibold text-lg">
+      
+      {/* ─── Header ───────────────────────────── */}
+      <div className="relative px-5 py-4 border-b border-slate-800 flex gap-3 items-center overflow-hidden">
+        {/* Tactical glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/25 via-amber-500/10 to-transparent blur-xl pointer-events-none" />
+
+        {/* Icon */}
+        <div
+          className="relative h-9 w-9 rounded-xl
+                     bg-emerald-600
+                     text-slate-950
+                     font-bold
+                     flex items-center justify-center
+                     shadow-[0_0_18px_rgba(16,185,129,0.45)]
+                     animate-pulse
+                     hover:animate-none
+                     transition-all duration-300"
+        >
           T
         </div>
-        <div>
-          <div className="text-sm font-semibold tracking-wide uppercase text-slate-200">
+
+        {/* Text */}
+        <div className="relative">
+          <div className="text-sm font-semibold tracking-wide uppercase text-emerald-200">
             Titan
           </div>
           <div className="text-xs text-slate-400">
@@ -30,6 +48,7 @@ export function Sidebar() {
         </div>
       </div>
 
+      {/* ─── Navigation ───────────────────────── */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const active =
@@ -46,20 +65,27 @@ export function Sidebar() {
                 active && "bg-slate-800 text-white border border-slate-700"
               )}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+              <span
+                className={clsx(
+                  "h-1.5 w-1.5 rounded-full",
+                  active ? "bg-emerald-400" : "bg-slate-600"
+                )}
+              />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
+      {/* ─── Logout ───────────────────────────── */}
       <Link
-  href="/logout"
-  className="block text-slate-400 hover:text-white text-xs px-3 py-2"
->
-  Logout
-</Link>
+        href="/logout"
+        className="px-4 py-2 text-xs text-slate-400 hover:text-white"
+      >
+        Logout
+      </Link>
 
+      {/* ─── Footer ───────────────────────────── */}
       <div className="px-4 py-3 border-t border-slate-800 text-xs text-slate-500">
         v0.1 • Dec 2025
       </div>

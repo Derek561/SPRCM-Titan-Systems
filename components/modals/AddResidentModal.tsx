@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import type { Resident } from "@/app/residents/page";
+import type { Resident } from "@/app/(app)/residents/page";
 
 export default function AddResidentModal({
   open,
