@@ -7,13 +7,8 @@ import { supabase } from "@/lib/supabaseClient";
 import ActionMenu from "@/components/resident/ActionMenu";
 import { requireAuth } from "@/lib/requireAuth";
 import AddResidentModal from "@/components/modals/AddResidentModal";
+import type { Resident } from "@/types/resident";
 
-type Resident = {
-  id: string;
-  full_name: string;
-  status: string;
-  archived: boolean;
-};
 
 export default function ResidentsPage() {
   const [residents, setResidents] = useState<Resident[]>([]);
