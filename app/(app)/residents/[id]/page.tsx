@@ -19,6 +19,10 @@ type Resident = {
   full_name: string;
   status: string;
   archived: boolean;
+  created_at: string;
+  updated_at: string;
+  discharge_date: string | null;
+  discharge_reason: string | null;
 };
 
 type NoteAttachment = {
@@ -58,20 +62,24 @@ export default function ResidentProfilePage() {
     async function loadData() {
       setLoading(true);
 
-      /* Resident */
-      const { data: resident } = await supabase
-  .from("residents")
-  .select(`
-    id,
-    full_name,
-    status,
-    created_at,
-    updated_at,
-    discharge_date,
-    discharge_reason
-  `)
-  .eq("id", params.id)
-  .single()
+      /* -------- Resident -------- */
+      const {
+        data: residentData,
+        error: residentError,
+      } = await supabase
+        .from("residents")
+        .select(`
+          id,
+          full_name,
+          status,
+          archived,
+          created_at,
+          updated_at,
+          discharge_date,
+          discharge_reason
+        `)
+        .eq("id", residentId)
+        .single();
 
       if (residentError || !residentData) {
         console.error("Resident load failed", residentError);
@@ -81,11 +89,10 @@ export default function ResidentProfilePage() {
 
       setResident(residentData);
 
-      /* Notes + Attachments */
+      /* -------- Notes + Attachments -------- */
       const { data: notesData } = await supabase
         .from("notes")
-        .select(
-          `
+        .select(`
           id,
           content,
           created_at,
@@ -93,8 +100,7 @@ export default function ResidentProfilePage() {
             id,
             file_name
           )
-        `
-        )
+        `)
         .eq("resident_id", residentId)
         .order("created_at", { ascending: false });
 
@@ -123,7 +129,6 @@ export default function ResidentProfilePage() {
 
   return (
     <div className="p-6 max-w-4xl space-y-6">
-
       {/* Header */}
       <ResidentHeader resident={resident} />
 
@@ -139,10 +144,7 @@ export default function ResidentProfilePage() {
           + Add Note
         </button>
 
-        <ActionMenu
-          id={resident.id}
-          archived={resident.archived}
-        />
+        <ActionMenu id={resident.id} archived={resident.archived} />
       </div>
 
       {/* Notes */}
@@ -152,9 +154,7 @@ export default function ResidentProfilePage() {
         </h2>
 
         {notes.length === 0 ? (
-          <p className="text-slate-400 text-sm">
-            No notes recorded yet.
-          </p>
+          <p className="text-slate-400 text-sm">No notes recorded yet.</p>
         ) : (
           <div className="space-y-4">
             {notes.map((note) => (
@@ -166,7 +166,6 @@ export default function ResidentProfilePage() {
                   {note.content}
                 </p>
 
-                {/* Attachments */}
                 {note.note_attachments?.length > 0 && (
                   <div className="mt-3">
                     <p className="text-slate-400 text-xs font-semibold mb-1">
