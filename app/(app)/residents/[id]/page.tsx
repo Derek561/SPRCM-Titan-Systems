@@ -59,11 +59,19 @@ export default function ResidentProfilePage() {
       setLoading(true);
 
       /* Resident */
-      const { data: residentData, error: residentError } = await supabase
-        .from("residents")
-        .select("*")
-        .eq("id", residentId)
-        .single();
+      const { data: resident } = await supabase
+  .from("residents")
+  .select(`
+    id,
+    full_name,
+    status,
+    created_at,
+    updated_at,
+    discharge_date,
+    discharge_reason
+  `)
+  .eq("id", params.id)
+  .single()
 
       if (residentError || !residentData) {
         console.error("Resident load failed", residentError);
