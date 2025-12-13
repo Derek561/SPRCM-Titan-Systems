@@ -44,7 +44,6 @@ type Note = {
 export default function ResidentProfilePage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-
   const residentId = params.id;
 
   const [resident, setResident] = useState<Resident | null>(null);
@@ -89,7 +88,7 @@ export default function ResidentProfilePage() {
 
       setResident(residentData);
 
-      /* -------- Notes + Attachments -------- */
+      /* -------- Notes -------- */
       const { data: notesData } = await supabase
         .from("notes")
         .select(`
@@ -132,10 +131,10 @@ export default function ResidentProfilePage() {
       {/* Header */}
       <ResidentHeader resident={resident} />
 
-      {/* Tasks — MUST be before notes */}
+      {/* Tasks */}
       <TaskPanel residentId={resident.id} />
 
-      {/* Action Row */}
+      {/* Actions */}
       <div className="flex gap-3 items-center">
         <button
           onClick={() => setShowAddNote(true)}
@@ -167,21 +166,16 @@ export default function ResidentProfilePage() {
                 </p>
 
                 {note.note_attachments?.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-slate-400 text-xs font-semibold mb-1">
-                      Attachments
-                    </p>
-                    <ul className="space-y-1">
-                      {note.note_attachments.map((file) => (
-                        <li
-                          key={file.id}
-                          className="text-orange-400 text-sm"
-                        >
-                          {file.file_name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <ul className="mt-2 space-y-1">
+                    {note.note_attachments.map((file) => (
+                      <li
+                        key={file.id}
+                        className="text-orange-400 text-sm"
+                      >
+                        {file.file_name}
+                      </li>
+                    ))}
+                  </ul>
                 )}
 
                 <p className="text-xs text-slate-500 mt-3">
