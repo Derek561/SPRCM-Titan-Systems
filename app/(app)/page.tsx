@@ -80,8 +80,8 @@ export default function DashboardPage() {
             .select("id, resident_id, title, category, due_type, due_date, status")
             .in("resident_id", activeResidentIds)
             .neq("status", "archived")
-            .order("due_date", { ascending: true, nullsLast: true }),
-          supabase
+            .order("due_date", { ascending: true }),
+             supabase
             .from("notes")
             .select("id, resident_id, content, created_at")
             .in("resident_id", activeResidentIds)
