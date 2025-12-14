@@ -1,36 +1,188 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Titan Workflow Systems
 
-## Getting Started
+Authoritative MVP — Workflow Truth Baseline
 
-First, run the development server:
+Purpose & Ownership
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Titan Workflow Systems is a private, purpose-built workflow system designed, owned, and operated exclusively by:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Derek Steinmetz
+DSS Enterprises, LLC
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Titan is used to support structured operational workflows related to Derek Steinmetz’s professional responsibilities at Simple Path Recovery. It is not a general-purpose SaaS product, not a multi-tenant platform, and not intended for public distribution.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All architectural, security, and design decisions prioritize:
 
-## Learn More
+Correctness over cleverness
 
-To learn more about Next.js, take a look at the following resources:
+Predictability over novelty
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Truth over convenience
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If a feature does not work cleanly, it is removed, deconstructed, and rebuilt rather than patched or disguised.
 
-## Deploy on Vercel
+System Philosophy (Non-Negotiable)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Titan follows a strict design doctrine:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Truth before progress
+
+Logic before features
+
+Workflow integrity over UI tricks
+
+No “Jedi mind tricks” to force behavior
+
+If a requirement cannot be expressed clearly in logic, schema, and user flow, it does not belong in the system.
+
+This repository represents a living but disciplined collaboration, where expansion only occurs when:
+
+The current state is fully understood
+
+The data model is correct
+
+The workflow makes operational sense
+
+What Titan Is (MVP Definition)
+
+Titan is a workflow engine, not a records dump.
+
+At MVP stage, Titan manages exactly four core concepts:
+
+Residents
+
+Lifecycle: active → archived
+
+Single source of truth for workflow context
+
+Tasks
+
+Actionable work items
+
+Due dates, categories, completion status
+
+Notes
+
+Human-entered operational context
+
+Ownership-enforced (RLS)
+
+Resident-scoped
+
+History (Audit by Behavior)
+
+Timestamped creation
+
+Status transitions
+
+No silent side effects
+
+That’s it — and that’s intentional.
+
+What Titan Is Not
+
+Titan explicitly does not attempt to be:
+
+An EHR
+
+A billing system
+
+A document management platform
+
+A CRM
+
+A compliance automation tool
+
+Those concerns may integrate later, but they are out of scope for this system.
+
+Attachments (Controlled Expansion)
+
+Attachments are an extension of notes, not a standalone feature.
+
+Rules:
+
+Every attachment belongs to exactly one note
+
+Every note belongs to exactly one resident
+
+Storage access is protected by ownership-aware RLS
+
+No orphaned files
+
+No public buckets
+
+No global attachment views
+
+Attachments exist to support workflow context, not file hoarding.
+
+Security & Data Integrity
+
+Titan enforces correctness through:
+
+PostgreSQL Row Level Security (RLS)
+
+Explicit ownership via created_by = auth.uid()
+
+Foreign key constraints with cascading deletes
+
+No anonymous access
+
+No hidden permissions
+
+Security is validated before feature expansion.
+
+Data Strategy
+
+At this stage:
+
+No historical production data is stored
+
+Test data is intentionally disposable
+
+Schema and policy definitions are the primary assets
+
+For real-world usage:
+
+Regular exports will be used to preserve resident data
+
+Schema snapshots act as catastrophic build recovery sources
+
+This repository is the authoritative build reference
+
+Technology Stack
+
+Frontend: Next.js (App Router)
+
+Backend: Supabase (Postgres + Auth + Storage)
+
+Security: Row Level Security (RLS)
+
+Deployment: Vercel
+
+Styling: Tailwind CSS (deliberately restrained)
+
+No unnecessary abstractions.
+No premature optimizations.
+
+Development Ethos
+
+This project is developed as a true collaboration, grounded in:
+
+Clear reasoning
+
+Explicit intent
+
+Willingness to stop and reassess
+
+Expansion only occurs when it improves real workflow execution, not theoretical completeness.
+
+Status
+
+Current Stage: MVP v0.1 — Workflow Truth Locked
+Next Focus: Attachment flow completion, then controlled data entry
+
+Final Note
+
+Titan exists to work, not to impress.
+
+If it ever stops doing that, it will be rebuilt.
