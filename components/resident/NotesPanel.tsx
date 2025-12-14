@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import type { NoteForTabs } from "./ResidentTabs";
 import AttachmentList from "@/components/attachments/AttachmentList";
+import { sanitizeFilename } from "@/lib/storage";
 
 export default function NotesPanel({
   residentId,
@@ -11,41 +11,73 @@ export default function NotesPanel({
   onNoteAdded,
 }: {
   residentId: string;
-  notes: NoteForTabs[];
-  onNoteAdded: (note: NoteForTabs) => void;
+  notes: {
+    id: string;
+    content: string;
+    created_at: string;
+  }[];
+  onNoteAdded: (note: any) => void;
 }) {
   const [content, setContent] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleAddNote() {
     if (!content.trim()) return;
+
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("notes")
-      .insert({
-        resident_id: residentId,
-        content: content.trim(),
-      })
-      .select("*")
-      .single();
+    try {
+      /* 1️⃣ Create note */
+      const { data: note, error: noteError } = await supabase
+        .from("notes")
+        .insert({
+          resident_id: residentId,
+          content: content.trim(),
+        })
+        .select()
+        .single();
 
-    setLoading(false);
+      if (noteError || !note) throw noteError;
 
-    if (error || !data) {
-      console.error(error);
-      alert("Unable to add note.");
-      return;
+      /* 2️⃣ Optional attachment */
+      if (file) {
+        const safeName = sanitizeFilename(file.name);
+        const objectKey = `${residentId}/${crypto.randomUUID()}-${safeName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("resident-files")
+          .upload(objectKey, file, { upsert: false });
+
+        if (uploadError) throw uploadError;
+
+        const { error: metaError } = await supabase
+          .from("note_attachments")
+          .insert({
+            note_id: note.id,
+            resident_id: residentId,
+            file_path: objectKey,
+            file_name: safeName,
+          });
+
+        if (metaError) throw metaError;
+      }
+
+      onNoteAdded(note);
+      setContent("");
+      setFile(null);
+    } catch (err) {
+      console.error("ADD NOTE ERROR:", err);
+      alert("Failed to save note or attachment.");
+    } finally {
+      setLoading(false);
     }
-
-    onNoteAdded(data as NoteForTabs);
-    setContent("");
   }
 
   return (
     <div className="space-y-6">
       {/* Add note */}
-      <div>
+      <div className="rounded-lg bg-slate-900 border border-slate-800 p-4">
         <h3 className="text-sm font-semibold text-slate-200 mb-2">
           Add a note
         </h3>
@@ -57,12 +89,19 @@ export default function NotesPanel({
           onChange={(e) => setContent(e.target.value)}
         />
 
-        <div className="mt-2 flex justify-end">
+        {/* ✅ Attachment input restored */}
+        <input
+          type="file"
+          className="mt-3 block w-full text-xs text-slate-300"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
+
+        <div className="mt-3 flex justify-end">
           <button
             type="button"
             onClick={handleAddNote}
             disabled={loading || !content.trim()}
-            className="px-4 py-1.5 text-sm rounded-lg bg-orange-500 hover:bg-orange-400 text-white transition disabled:opacity-50"
+            className="px-4 py-1.5 text-sm rounded-lg bg-orange-600 hover:bg-orange-500 text-white transition disabled:opacity-50"
           >
             {loading ? "Saving…" : "Save Note"}
           </button>
@@ -77,7 +116,7 @@ export default function NotesPanel({
 
         {notes.length === 0 ? (
           <p className="text-slate-500 text-sm">
-            No notes recorded yet. Start the record above.
+            No notes recorded yet.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -90,6 +129,7 @@ export default function NotesPanel({
                   {note.content}
                 </p>
 
+                {/* ✅ Attachments render here */}
                 <AttachmentList noteId={note.id} />
 
                 <div className="text-xs text-slate-400">
