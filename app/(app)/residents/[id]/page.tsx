@@ -9,6 +9,10 @@ import ActionMenu from "@/components/resident/ActionMenu";
 import TaskPanel from "@/components/resident/TaskPanel";
 import ResidentTabs from "@/components/resident/ResidentTabs";
 
+/* =========================
+   Types
+========================= */
+
 type Resident = {
   id: string;
   full_name: string;
@@ -26,13 +30,15 @@ type NoteForTabs = {
   created_at: string;
 };
 
-type DueDateForTabs = {
+type ResidentTask = {
   id: string;
-  title: string;
-  due_date: string;
-  completed: boolean;
-  created_at: string;
+  due_date: string | null;
+  status: string;
 };
+
+/* =========================
+   Page
+========================= */
 
 export default function ResidentProfilePage() {
   const router = useRouter();
@@ -40,7 +46,7 @@ export default function ResidentProfilePage() {
 
   const [resident, setResident] = useState<Resident | null>(null);
   const [notes, setNotes] = useState<NoteForTabs[]>([]);
-  const [dueDates, setDueDates] = useState<DueDateForTabs[]>([]);
+  const [tasks, setTasks] = useState<ResidentTask[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,22 +66,23 @@ export default function ResidentProfilePage() {
         return;
       }
 
-      const [{ data: notesData }, { data: dueData }] = await Promise.all([
+      const [{ data: notesData }, { data: taskData }] = await Promise.all([
         supabase
           .from("notes")
           .select("id, content, created_at")
           .eq("resident_id", residentId)
           .order("created_at", { ascending: false }),
+
         supabase
-          .from("due_dates")
-          .select("*")
+          .from("resident_tasks")
+          .select("id, due_date, status")
           .eq("resident_id", residentId)
-          .order("due_date", { ascending: true }),
+          .neq("status", "archived"),
       ]);
 
       setResident(residentData);
       setNotes(notesData ?? []);
-      setDueDates(dueData ?? []);
+      setTasks(taskData ?? []);
       setLoading(false);
     }
 
@@ -95,7 +102,7 @@ export default function ResidentProfilePage() {
       <ResidentTabs
         resident={resident}
         notes={notes}
-        dueDates={dueDates}
+        tasks={tasks}
         onNoteAdded={(n) => setNotes((prev) => [n, ...prev])}
       />
 
