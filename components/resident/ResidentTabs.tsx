@@ -26,23 +26,21 @@ export type NoteForTabs = {
   created_at: string;
 };
 
-export type DueDateForTabs = {
+export type ResidentTaskForTabs = {
   id: string;
-  title: string;
-  due_date: string;
-  completed: boolean;
-  created_at: string;
+  due_date: string | null;
+  status: string;
 };
 
 type Props = {
   resident: ResidentForTabs;
   notes: NoteForTabs[];
-  dueDates: DueDateForTabs[]; // still passed for now (used by Overview + History)
+  tasks: ResidentTaskForTabs[];
   onNoteAdded: (note: NoteForTabs) => void;
 };
 
 /* -----------------------------
-   Tabs (Due Dates REMOVED)
+   Tabs
 ----------------------------- */
 
 const tabs = ["Overview", "Notes", "History"] as const;
@@ -51,7 +49,7 @@ type TabKey = (typeof tabs)[number];
 export default function ResidentTabs({
   resident,
   notes,
-  dueDates,
+  tasks,
   onNoteAdded,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("Overview");
@@ -83,11 +81,7 @@ export default function ResidentTabs({
       {/* Panel body */}
       <div className="p-6">
         {activeTab === "Overview" && (
-          <OverviewPanel
-            resident={resident}
-            notes={notes}
-            dueDates={dueDates}
-          />
+          <OverviewPanel resident={resident} notes={notes} tasks={tasks} />
         )}
 
         {activeTab === "Notes" && (
@@ -99,11 +93,7 @@ export default function ResidentTabs({
         )}
 
         {activeTab === "History" && (
-          <HistoryPanel
-            resident={resident}
-            notes={notes}
-            dueDates={dueDates}
-          />
+          <HistoryPanel resident={resident} notes={notes} tasks={tasks} />
         )}
       </div>
     </section>

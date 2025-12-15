@@ -3,28 +3,32 @@
 import type {
   ResidentForTabs,
   NoteForTabs,
-  DueDateForTabs,
+  ResidentTaskForTabs,
 } from "./ResidentTabs";
 
 export default function OverviewPanel({
   resident,
   notes,
-  dueDates,
+  tasks,
 }: {
   resident: ResidentForTabs;
   notes: NoteForTabs[];
-  dueDates: DueDateForTabs[];
+  tasks: ResidentTaskForTabs[];
 }) {
-  const openDue = dueDates.filter((d) => !d.completed);
-  const overdue = openDue.filter(
-    (d) => new Date(d.due_date).getTime() < startOfToday()
+  const today = startOfToday();
+
+  const openTasks = tasks.filter(
+    (t) => t.status === "open" && t.due_date
   );
-  const dueSoon = openDue.filter(
-    (d) =>
-      new Date(d.due_date).getTime() >= startOfToday() &&
-      new Date(d.due_date).getTime() <
-        startOfToday() + 7 * 24 * 60 * 60 * 1000
+
+  const overdue = openTasks.filter(
+    (t) => new Date(t.due_date!).getTime() < today
   );
+
+  const dueSoon = openTasks.filter((t) => {
+    const d = new Date(t.due_date!).getTime();
+    return d >= today && d < today + 7 * 24 * 60 * 60 * 1000;
+  });
 
   const lastNote = notes[0];
 
@@ -39,45 +43,26 @@ export default function OverviewPanel({
         <dl className="space-y-2 text-sm text-slate-300">
           <div className="flex justify-between">
             <dt className="text-slate-400">Status</dt>
-            <dd className="capitalize text-orange-300">{resident.status}</dd>
+            <dd className="capitalize text-orange-300">
+              {resident.status}
+            </dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-slate-400">Created</dt>
             <dd>
-              {new Date(resident.created_at).toLocaleDateString()} •{" "}
-              <span className="text-slate-500 text-xs">record opened</span>
+              {new Date(resident.created_at).toLocaleDateString()}
             </dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-slate-400">Last Updated</dt>
-            <dd>{new Date(resident.updated_at).toLocaleString()}</dd>
+            <dd>
+              {new Date(resident.updated_at).toLocaleString()}
+            </dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-slate-400">Notes</dt>
             <dd>{notes.length}</dd>
           </div>
-          <div className="flex justify-between">
-            <dt className="text-slate-400">Open Items</dt>
-            <dd>{openDue.length}</dd>
-          </div>
-
-          {resident.discharge_date && (
-            <>
-              <div className="h-px bg-slate-800 my-2" />
-              <div className="flex justify-between">
-                <dt className="text-slate-400">Discharge Date</dt>
-                <dd>
-                  {new Date(resident.discharge_date).toLocaleDateString()}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-400 text-xs mb-1">Discharge Reason</dt>
-                <dd className="text-slate-300 text-sm">
-                  {resident.discharge_reason || "Not documented"}
-                </dd>
-              </div>
-            </>
-          )}
         </dl>
       </div>
 
@@ -100,7 +85,7 @@ export default function OverviewPanel({
           />
           <SummaryRow
             label="Total scheduled items"
-            value={dueDates.length}
+            value={tasks.filter((t) => t.due_date).length}
             tone="neutral"
           />
 
@@ -111,17 +96,12 @@ export default function OverviewPanel({
               Last note logged
             </p>
             {lastNote ? (
-              <>
-                <p className="text-slate-300 text-sm truncate">
-                  {lastNote.content}
-                </p>
-                <p className="text-slate-500 text-xs mt-1">
-                  {new Date(lastNote.created_at).toLocaleString()}
-                </p>
-              </>
+              <p className="text-slate-300 text-sm truncate">
+                {lastNote.content}
+              </p>
             ) : (
               <p className="text-slate-500 text-sm">
-                No notes yet. Use the Notes tab to document activity.
+                No notes yet.
               </p>
             )}
           </div>
@@ -154,7 +134,9 @@ function SummaryRow({
   return (
     <div className="flex justify-between items-center">
       <span className="text-slate-400 text-sm">{label}</span>
-      <span className={`text-base font-semibold ${color}`}>{value}</span>
+      <span className={`text-base font-semibold ${color}`}>
+        {value}
+      </span>
     </div>
   );
 }
